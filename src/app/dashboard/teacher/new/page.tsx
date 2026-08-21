@@ -5,6 +5,16 @@ import NewTransactionForm from "@/components/NewTransactionForm";
 
 export default async function NewTransactionPage() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user!.id)
+    .single();
+
   const { data: sopEntries } = await supabase
     .from("sop_catalog")
     .select("id, transaction_type, title, purpose, requirements, steps, processing_time_days")
@@ -13,7 +23,12 @@ export default async function NewTransactionPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <DashboardHeader title="New Transaction" subtitle="Submit a request for review" />
+      <DashboardHeader
+        title="New Transaction"
+        subtitle="Submit a request for review"
+        role="teacher"
+        userName={profile?.full_name}
+      />
 
       <main className="mx-auto max-w-2xl px-6 py-8">
         <Link href="/dashboard/teacher" className="text-sm text-blue-700 hover:underline">

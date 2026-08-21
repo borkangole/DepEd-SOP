@@ -10,6 +10,12 @@ export default async function TeacherDashboard() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user!.id)
+    .single();
+
   const { data: transactions } = await supabase
     .from("transactions")
     .select("id, transaction_type, leave_kind, current_status, submitted_at")
@@ -18,7 +24,12 @@ export default async function TeacherDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <DashboardHeader title="Teacher Dashboard" subtitle="Your submitted transactions" />
+      <DashboardHeader
+        title="Teacher Dashboard"
+        subtitle="Your submitted transactions"
+        role="teacher"
+        userName={profile?.full_name}
+      />
 
       <main className="mx-auto max-w-3xl px-6 py-8">
         <div className="mb-4 flex items-center justify-between">

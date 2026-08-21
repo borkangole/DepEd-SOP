@@ -3,6 +3,16 @@ import DashboardHeader from "@/components/DashboardHeader";
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user!.id)
+    .single();
+
   const { data: sopEntries } = await supabase
     .from("sop_catalog")
     .select("id, title, purpose, requirements, steps, processing_time_days, is_active")
@@ -18,7 +28,12 @@ export default async function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <DashboardHeader title="Super Admin Dashboard" subtitle="Manage the SOP catalog" />
+      <DashboardHeader
+        title="Super Admin Dashboard"
+        subtitle="Manage the SOP catalog"
+        role="super_admin"
+        userName={profile?.full_name}
+      />
 
       <main className="mx-auto max-w-4xl px-6 py-8">
         <div className="mb-6 grid grid-cols-2 gap-4">

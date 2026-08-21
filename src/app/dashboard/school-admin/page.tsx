@@ -6,6 +6,15 @@ import { STATUS_LABEL, STATUS_COLOR, SCHOOL_ADMIN_NEXT } from "@/lib/status";
 
 export default async function SchoolAdminDashboard() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user!.id)
+    .single();
 
   // RLS (transactions_select_school_admin) already scopes this to the
   // caller's own school — no need to filter by school_id client-side,
@@ -22,6 +31,8 @@ export default async function SchoolAdminDashboard() {
       <DashboardHeader
         title="School Administrative Dashboard"
         subtitle="Verify and endorse transactions from your school"
+        role="school_admin"
+        userName={profile?.full_name}
       />
 
       <main className="mx-auto max-w-4xl px-6 py-8">

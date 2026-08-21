@@ -6,6 +6,15 @@ import { STATUS_LABEL, STATUS_COLOR, DIVISION_NEXT } from "@/lib/status";
 
 export default async function DivisionDashboard() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user!.id)
+    .single();
 
   const { data: transactions } = await supabase
     .from("transactions")
@@ -16,7 +25,12 @@ export default async function DivisionDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <DashboardHeader title="Division Office Dashboard" subtitle="Process endorsed transactions" />
+      <DashboardHeader
+        title="Division Office Dashboard"
+        subtitle="Process endorsed transactions"
+        role="division"
+        userName={profile?.full_name}
+      />
 
       <main className="mx-auto max-w-4xl px-6 py-8">
         <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
