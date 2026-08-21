@@ -17,7 +17,8 @@ export default async function LoginPage({
 
         {params.registered && (
           <p className="mt-4 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
-            Account created. You can now sign in.
+            Account created. Check your email for a confirmation link before signing in — you won&rsquo;t be
+            able to log in until you&rsquo;ve clicked it.
           </p>
         )}
 

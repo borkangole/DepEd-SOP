@@ -19,6 +19,17 @@ export async function login(formData: FormData): Promise<{ error: string } | voi
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
+    // Supabase returns a specific error code when the account exists and the
+    // password is correct, but the user hasn't clicked the confirmation link
+    // in their email yet. Surface that distinctly instead of the generic
+    // "invalid credentials" message — otherwise it looks like a typo'd
+    // password when it's actually just an unconfirmed account.
+    if (error.code === "email_not_confirmed") {
+      return {
+        error:
+          "Please confirm your email first. Check your inbox (and spam folder) for a confirmation link from Supabase, then try signing in again.",
+      };
+    }
     return { error: "Invalid email or password." };
   }
 
