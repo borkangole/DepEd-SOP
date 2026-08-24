@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { submitTransaction } from "@/app/actions/transactions";
 
 const initialState: { error: string } = { error: "" };
@@ -18,6 +18,17 @@ type SopEntry = {
 export default function NewTransactionForm({ sopEntries }: { sopEntries: SopEntry[] }) {
   const [selectedId, setSelectedId] = useState(sopEntries[0]?.id ?? "");
   const selected = sopEntries.find((s) => s.id === selectedId);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function removeFile(index: number) {
+    if (!fileInputRef.current) return;
+    const next = selectedFiles.filter((_, i) => i !== index);
+    const dataTransfer = new DataTransfer();
+    next.forEach((f) => dataTransfer.items.add(f));
+    fileInputRef.current.files = dataTransfer.files;
+    setSelectedFiles(next);
+  }
 
   const [state, formAction, pending] = useActionState(async (_prev: { error: string }, formData: FormData) => {
     const result = await submitTransaction(formData);
@@ -133,10 +144,60 @@ export default function NewTransactionForm({ sopEntries }: { sopEntries: SopEntr
         />
       </div>
 
-      <p className="text-xs text-slate-500">
-        Document upload is not wired up in this pilot slice yet — attach physical/scanned copies when the
-        School Administrative Officer verifies your submission.
-      </p>
+      <div>
+        <label className="block text-sm font-medium text-slate-700">Supporting documents (optional)</label>
+
+        <label
+          htmlFor="documents"
+          className="mt-1 flex cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center transition hover:border-blue-400 hover:bg-blue-50"
+        >
+          <span className="text-sm text-slate-600">
+            <span className="font-semibold text-blue-700">Click to choose files</span>
+          </span>
+          <span className="mt-1 text-xs text-slate-400">PDF, Word, or image — max 10MB each</span>
+        </label>
+        <input
+          ref={fileInputRef}
+          id="documents"
+          name="documents"
+          type="file"
+          multiple
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.heic"
+          className="sr-only"
+          onChange={(e) => setSelectedFiles(Array.from(e.target.files ?? []))}
+        />
+
+        {selectedFiles.length > 0 && (
+          <ul className="mt-2 space-y-1">
+            {selectedFiles.map((f, i) => (
+              <li
+                key={`${f.name}-${i}`}
+                className="flex items-center justify-between gap-2 rounded-md bg-slate-100 px-3 py-1.5 text-xs text-slate-700"
+              >
+                <span className="truncate" title={f.name}>
+                  {f.name}
+                </span>
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="text-slate-400">{(f.size / (1024 * 1024)).toFixed(1)} MB</span>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(i)}
+                    className="font-medium text-red-600 hover:text-red-700"
+                    aria-label={`Remove ${f.name}`}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <p className="mt-1 text-xs text-slate-500">
+          You can also attach documents later from your dashboard, e.g. if the School Administrative Officer
+          asks for something additional.
+        </p>
+      </div>
 
       {state.error && (
         <p role="alert" className="text-sm text-red-600">

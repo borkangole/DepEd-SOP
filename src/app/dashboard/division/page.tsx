@@ -1,8 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatusUpdateForm from "@/components/StatusUpdateForm";
+import DocumentList from "@/components/DocumentList";
 import type { TransactionStatus } from "@/lib/types/database";
 import { STATUS_LABEL, STATUS_COLOR, DIVISION_NEXT } from "@/lib/status";
+import { fetchDocumentsByTransaction } from "@/lib/documents";
 
 export default async function DivisionDashboard() {
   const supabase = await createClient();
@@ -22,6 +24,11 @@ export default async function DivisionDashboard() {
       "id, transaction_type, leave_kind, current_status, submitted_at, profiles!transactions_teacher_id_fkey(full_name), schools(name)"
     )
     .order("submitted_at", { ascending: false });
+
+  const documentsByTransaction = await fetchDocumentsByTransaction(
+    supabase,
+    (transactions ?? []).map((t) => t.id)
+  );
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -65,6 +72,8 @@ export default async function DivisionDashboard() {
                         {STATUS_LABEL[(t.current_status as TransactionStatus)]}
                       </span>
                     </div>
+                    <DocumentList documents={documentsByTransaction[t.id] ?? []} />
+
                     <div className="mt-2">
                       <StatusUpdateForm
                         transactionId={t.id}

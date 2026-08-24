@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { TransactionStatus, TransactionType, LeaveKind } from "@/lib/types/database";
+import { validateDocumentFile, saveDocumentToTransaction } from "@/lib/documents";
 
 // ---------------------------------------------------------------------------
 // Teacher: submit a new transaction.
@@ -43,17 +44,42 @@ export async function submitTransaction(formData: FormData): Promise<{ error: st
     return { error: "Please select whether this is Maternity Leave or Leave Credits." };
   }
 
-  const { error } = await supabase.from("transactions").insert({
-    transaction_type: transactionType,
-    leave_kind: leaveKind,
-    sop_catalog_id: sopCatalogId,
-    teacher_id: user.id,
-    school_id: profile.school_id,
-    details: { reason, start_date: startDate, end_date: endDate, destination },
-  });
+  // Validate any attached documents up front, before creating anything —
+  // a bad file shouldn't leave behind a half-submitted transaction.
+  const documentFiles = formData
+    .getAll("documents")
+    .filter((f): f is File => f instanceof File && f.size > 0);
 
-  if (error) {
-    return { error: error.message };
+  for (const file of documentFiles) {
+    const validationError = validateDocumentFile(file);
+    if (validationError) return { error: validationError };
+  }
+
+  const { data: inserted, error } = await supabase
+    .from("transactions")
+    .insert({
+      transaction_type: transactionType,
+      leave_kind: leaveKind,
+      sop_catalog_id: sopCatalogId,
+      teacher_id: user.id,
+      school_id: profile.school_id,
+      details: { reason, start_date: startDate, end_date: endDate, destination },
+    })
+    .select("id")
+    .single();
+
+  if (error || !inserted) {
+    return { error: error?.message ?? "Failed to create transaction." };
+  }
+
+  // Best-effort: the transaction itself is already created at this point,
+  // so a failed attachment doesn't block submission — the teacher can
+  // still attach it afterwards from their dashboard.
+  for (const file of documentFiles) {
+    const result = await saveDocumentToTransaction(supabase, inserted.id, user.id, file);
+    if (result?.error) {
+      console.error(`Failed to attach "${file.name}" to transaction ${inserted.id}:`, result.error);
+    }
   }
 
   revalidatePath("/dashboard/teacher");
