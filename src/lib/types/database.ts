@@ -3,8 +3,9 @@
 //   npx supabase gen types typescript --project-id <ref> > src/lib/types/database.ts
 
 export type UserRole = "teacher" | "school_admin" | "division" | "super_admin";
-export type TransactionType = "authority_to_travel" | "leave_application";
+export type TransactionType = "authority_to_travel" | "leave_application" | "transfer_of_assignment";
 export type LeaveKind = "maternity" | "leave_credits";
+export type TransferScope = "teaching_school_to_school" | "non_teaching_or_senior_hs" | "other_division_agency";
 export type TransactionStatus =
   | "submitted"
   | "under_verification"
@@ -44,6 +45,8 @@ export interface Database {
         Row: {
           id: string;
           transaction_type: TransactionType;
+          leave_kind: LeaveKind | null;
+          transfer_scope: TransferScope | null;
           title: string;
           purpose: string;
           requirements: string[];
@@ -66,6 +69,7 @@ export interface Database {
           id: string;
           transaction_type: TransactionType;
           leave_kind: LeaveKind | null;
+          transfer_scope: TransferScope | null;
           sop_catalog_id: string;
           teacher_id: string;
           school_id: string;

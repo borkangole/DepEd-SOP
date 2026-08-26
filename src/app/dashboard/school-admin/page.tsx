@@ -1,10 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import DashboardHeader from "@/components/DashboardHeader";
-import StatusUpdateForm from "@/components/StatusUpdateForm";
-import DocumentList from "@/components/DocumentList";
+import StatCards from "@/components/StatCards";
+import TransactionListRow from "@/components/TransactionListRow";
 import type { TransactionStatus } from "@/lib/types/database";
-import { STATUS_LABEL, STATUS_COLOR, SCHOOL_ADMIN_NEXT } from "@/lib/status";
-import { fetchDocumentsByTransaction } from "@/lib/documents";
+import { countTeacherStyleStats } from "@/lib/status";
 
 export default async function SchoolAdminDashboard() {
   const supabase = await createClient();
@@ -24,13 +23,12 @@ export default async function SchoolAdminDashboard() {
   const { data: transactions } = await supabase
     .from("transactions")
     .select(
-      "id, transaction_type, leave_kind, current_status, submitted_at, teacher_id, profiles!transactions_teacher_id_fkey(full_name)"
+      "id, transaction_type, leave_kind, transfer_scope, current_status, submitted_at, teacher_id, profiles!transactions_teacher_id_fkey(full_name)"
     )
     .order("submitted_at", { ascending: false });
 
-  const documentsByTransaction = await fetchDocumentsByTransaction(
-    supabase,
-    (transactions ?? []).map((t) => t.id)
+  const stats = countTeacherStyleStats(
+    (transactions ?? []).map((t) => ({ current_status: t.current_status as TransactionStatus }))
   );
 
   return (
@@ -43,6 +41,15 @@ export default async function SchoolAdminDashboard() {
       />
 
       <main className="mx-auto max-w-4xl px-6 py-8">
+        <StatCards
+          stats={[
+            { label: "Total", value: stats.total },
+            { label: "Pending", value: stats.pending, accent: "text-amber-600" },
+            { label: "Approved", value: stats.approved, accent: "text-green-600" },
+            { label: "Rejected", value: stats.rejected, accent: "text-red-600" },
+          ]}
+        />
+
         <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
           {!transactions || transactions.length === 0 ? (
             <p className="px-4 py-8 text-center text-sm text-slate-500">
@@ -55,34 +62,12 @@ export default async function SchoolAdminDashboard() {
                   ? t.profiles[0]?.full_name
                   : (t.profiles as { full_name: string } | null)?.full_name;
                 return (
-                  <li key={t.id} className="px-4 py-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-slate-900">
-                          {t.transaction_type === "authority_to_travel"
-                            ? "Authority to Travel"
-                            : `Leave Application (${t.leave_kind === "maternity" ? "Maternity" : "Leave Credits"})`}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {teacherName ?? "Unknown teacher"} · Submitted{" "}
-                          {new Date(t.submitted_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-medium ${STATUS_COLOR[(t.current_status as TransactionStatus)]}`}
-                      >
-                        {STATUS_LABEL[(t.current_status as TransactionStatus)]}
-                      </span>
-                    </div>
-                    <DocumentList documents={documentsByTransaction[t.id] ?? []} />
-
-                    <div className="mt-2">
-                      <StatusUpdateForm
-                        transactionId={t.id}
-                        options={SCHOOL_ADMIN_NEXT[(t.current_status as TransactionStatus)] ?? []}
-                        redirectPath="/dashboard/school-admin"
-                      />
-                    </div>
+                  <li key={t.id}>
+                    <TransactionListRow
+                      href={`/dashboard/school-admin/transactions/${t.id}`}
+                      transaction={t}
+                      meta={teacherName ?? "Unknown teacher"}
+                    />
                   </li>
                 );
               })}

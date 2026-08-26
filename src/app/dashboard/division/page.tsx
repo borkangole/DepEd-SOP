@@ -1,12 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
 import DashboardHeader from "@/components/DashboardHeader";
-import StatusUpdateForm from "@/components/StatusUpdateForm";
-import DocumentList from "@/components/DocumentList";
+import StatCards from "@/components/StatCards";
+import TransactionSearchBar from "@/components/TransactionSearchBar";
+import TransactionListRow from "@/components/TransactionListRow";
 import type { TransactionStatus } from "@/lib/types/database";
-import { STATUS_LABEL, STATUS_COLOR, DIVISION_NEXT } from "@/lib/status";
-import { fetchDocumentsByTransaction } from "@/lib/documents";
+import { countDivisionStyleStats, getTransactionLabel } from "@/lib/status";
 
-export default async function DivisionDashboard() {
+export default async function DivisionDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -21,14 +26,33 @@ export default async function DivisionDashboard() {
   const { data: transactions } = await supabase
     .from("transactions")
     .select(
-      "id, transaction_type, leave_kind, current_status, submitted_at, profiles!transactions_teacher_id_fkey(full_name), schools(name)"
+      "id, transaction_type, leave_kind, transfer_scope, current_status, submitted_at, profiles!transactions_teacher_id_fkey(full_name), schools(name)"
     )
     .order("submitted_at", { ascending: false });
 
-  const documentsByTransaction = await fetchDocumentsByTransaction(
-    supabase,
-    (transactions ?? []).map((t) => t.id)
-  );
+  const rows = (transactions ?? []).map((t) => {
+    const teacherName = Array.isArray(t.profiles)
+      ? t.profiles[0]?.full_name
+      : (t.profiles as { full_name: string } | null)?.full_name;
+    const schoolName = Array.isArray(t.schools) ? t.schools[0]?.name : (t.schools as { name: string } | null)?.name;
+    return { ...t, teacherName: teacherName ?? "Unknown", schoolName: schoolName ?? "Unknown school" };
+  });
+
+  // Simple case-insensitive substring match on teacher name, school name,
+  // or the transaction's display label (e.g. "Transfer of Assignment").
+  // Search is applied server-side, after RLS has already scoped the rows
+  // Division is allowed to see — it isn't a security boundary, just a filter.
+  const query = (q ?? "").trim().toLowerCase();
+  const filtered = query
+    ? rows.filter(
+        (t) =>
+          t.teacherName.toLowerCase().includes(query) ||
+          t.schoolName.toLowerCase().includes(query) ||
+          getTransactionLabel(t).toLowerCase().includes(query)
+      )
+    : rows;
+
+  const stats = countDivisionStyleStats(rows.map((t) => ({ current_status: t.current_status as TransactionStatus })));
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -40,50 +64,34 @@ export default async function DivisionDashboard() {
       />
 
       <main className="mx-auto max-w-4xl px-6 py-8">
+        <StatCards
+          stats={[
+            { label: "Total", value: stats.total },
+            { label: "Pending", value: stats.pending, accent: "text-slate-600" },
+            { label: "Processing", value: stats.processing, accent: "text-indigo-600" },
+            { label: "Approved", value: stats.approved, accent: "text-green-600" },
+            { label: "Rejected", value: stats.rejected, accent: "text-red-600" },
+          ]}
+        />
+
+        <TransactionSearchBar action="/dashboard/division" defaultValue={q} />
+
         <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-          {!transactions || transactions.length === 0 ? (
-            <p className="px-4 py-8 text-center text-sm text-slate-500">No transactions yet.</p>
+          {filtered.length === 0 ? (
+            <p className="px-4 py-8 text-center text-sm text-slate-500">
+              {query ? `No transactions match "${q}".` : "No transactions yet."}
+            </p>
           ) : (
             <ul className="divide-y divide-slate-100">
-              {transactions.map((t) => {
-                const teacherName = Array.isArray(t.profiles)
-                  ? t.profiles[0]?.full_name
-                  : (t.profiles as { full_name: string } | null)?.full_name;
-                const schoolName = Array.isArray(t.schools)
-                  ? t.schools[0]?.name
-                  : (t.schools as { name: string } | null)?.name;
-                return (
-                  <li key={t.id} className="px-4 py-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-slate-900">
-                          {t.transaction_type === "authority_to_travel"
-                            ? "Authority to Travel"
-                            : `Leave Application (${t.leave_kind === "maternity" ? "Maternity" : "Leave Credits"})`}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {teacherName ?? "Unknown"} · {schoolName ?? "Unknown school"} · Submitted{" "}
-                          {new Date(t.submitted_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-medium ${STATUS_COLOR[(t.current_status as TransactionStatus)]}`}
-                      >
-                        {STATUS_LABEL[(t.current_status as TransactionStatus)]}
-                      </span>
-                    </div>
-                    <DocumentList documents={documentsByTransaction[t.id] ?? []} />
-
-                    <div className="mt-2">
-                      <StatusUpdateForm
-                        transactionId={t.id}
-                        options={DIVISION_NEXT[(t.current_status as TransactionStatus)] ?? []}
-                        redirectPath="/dashboard/division"
-                      />
-                    </div>
-                  </li>
-                );
-              })}
+              {filtered.map((t) => (
+                <li key={t.id}>
+                  <TransactionListRow
+                    href={`/dashboard/division/transactions/${t.id}`}
+                    transaction={t}
+                    meta={`${t.teacherName} · ${t.schoolName}`}
+                  />
+                </li>
+              ))}
             </ul>
           )}
         </div>

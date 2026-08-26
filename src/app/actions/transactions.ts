@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { TransactionStatus, TransactionType, LeaveKind } from "@/lib/types/database";
+import type { TransactionStatus, TransactionType, LeaveKind, TransferScope } from "@/lib/types/database";
 import { validateDocumentFile, saveDocumentToTransaction } from "@/lib/documents";
 
 // ---------------------------------------------------------------------------
@@ -32,6 +32,9 @@ export async function submitTransaction(formData: FormData): Promise<{ error: st
   const transactionType = String(formData.get("transaction_type") ?? "") as TransactionType;
   const sopCatalogId = String(formData.get("sop_catalog_id") ?? "");
   const leaveKind = formData.get("leave_kind") ? (String(formData.get("leave_kind")) as LeaveKind) : null;
+  const transferScope = formData.get("transfer_scope")
+    ? (String(formData.get("transfer_scope")) as TransferScope)
+    : null;
   const reason = String(formData.get("reason") ?? "").trim();
   const startDate = String(formData.get("start_date") ?? "");
   const endDate = String(formData.get("end_date") ?? "");
@@ -40,8 +43,15 @@ export async function submitTransaction(formData: FormData): Promise<{ error: st
   if (!transactionType || !sopCatalogId || !reason || !startDate || !endDate) {
     return { error: "Please fill in all required fields." };
   }
+  // leave_kind / transfer_scope now come from whichever catalog entry the
+  // teacher picked (each request type is its own dropdown option), rather
+  // than a separate manual selection — these checks are a defensive
+  // backstop in case that hidden field ever came through empty.
   if (transactionType === "leave_application" && !leaveKind) {
-    return { error: "Please select whether this is Maternity Leave or Leave Credits." };
+    return { error: "Missing leave type for this leave application — please re-select the transaction type." };
+  }
+  if (transactionType === "transfer_of_assignment" && !transferScope) {
+    return { error: "Missing transfer category — please re-select the transaction type." };
   }
 
   // Validate any attached documents up front, before creating anything —
@@ -60,6 +70,7 @@ export async function submitTransaction(formData: FormData): Promise<{ error: st
     .insert({
       transaction_type: transactionType,
       leave_kind: leaveKind,
+      transfer_scope: transferScope,
       sop_catalog_id: sopCatalogId,
       teacher_id: user.id,
       school_id: profile.school_id,

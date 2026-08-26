@@ -7,7 +7,9 @@ const initialState: { error: string } = { error: "" };
 
 type SopEntry = {
   id: string;
-  transaction_type: "authority_to_travel" | "leave_application";
+  transaction_type: "authority_to_travel" | "leave_application" | "transfer_of_assignment";
+  leave_kind: "maternity" | "leave_credits" | null;
+  transfer_scope: "teaching_school_to_school" | "non_teaching_or_senior_hs" | "other_division_agency" | null;
   title: string;
   purpose: string;
   requirements: string[];
@@ -56,37 +58,28 @@ export default function NewTransactionForm({ sopEntries }: { sopEntries: SopEntr
           ))}
         </select>
         <input type="hidden" name="transaction_type" value={selected?.transaction_type ?? ""} />
+        <input type="hidden" name="leave_kind" value={selected?.leave_kind ?? ""} />
+        <input type="hidden" name="transfer_scope" value={selected?.transfer_scope ?? ""} />
       </div>
 
       {selected && (
         <div className="rounded-md border border-blue-100 bg-blue-50 p-4 text-sm text-slate-700">
           <p className="font-medium text-slate-900">{selected.purpose}</p>
-          <p className="mt-2 font-medium text-slate-900">Requirements:</p>
-          <ul className="ml-4 list-disc">
-            {selected.requirements.map((r) => (
-              <li key={r}>{r}</li>
-            ))}
-          </ul>
+          {selected.requirements.length > 0 ? (
+            <>
+              <p className="mt-2 font-medium text-slate-900">Requirements:</p>
+              <ul className="ml-4 list-disc">
+                {selected.requirements.map((r) => (
+                  <li key={r}>{r}</li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="mt-2 text-slate-600">No supporting documents required for this request type.</p>
+          )}
           <p className="mt-2 text-xs text-slate-500">
             Typical processing time: {selected.processing_time_days} working day(s)
           </p>
-        </div>
-      )}
-
-      {selected?.transaction_type === "leave_application" && (
-        <div>
-          <label htmlFor="leave_kind" className="block text-sm font-medium text-slate-700">
-            Leave type
-          </label>
-          <select
-            id="leave_kind"
-            name="leave_kind"
-            required
-            className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
-          >
-            <option value="maternity">Maternity Leave</option>
-            <option value="leave_credits">Leave Credits</option>
-          </select>
         </div>
       )}
 

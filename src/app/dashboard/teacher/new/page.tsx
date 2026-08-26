@@ -17,7 +17,7 @@ export default async function NewTransactionPage() {
 
   const { data: sopEntries } = await supabase
     .from("sop_catalog")
-    .select("id, transaction_type, title, purpose, requirements, steps, processing_time_days")
+    .select("id, transaction_type, leave_kind, transfer_scope, title, purpose, requirements, steps, processing_time_days")
     .eq("is_active", true)
     .order("title");
 
