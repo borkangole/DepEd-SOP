@@ -80,9 +80,11 @@ export default function RegisterForm({ schools }: { schools: School[] }) {
         >
           <option value="teacher">Teacher / Personnel</option>
           <option value="school_admin">School Administrative Assistant/Officer</option>
+          <option value="division">Division Office</option>
         </select>
         <p className="mt-1 text-xs text-slate-500">
-          Division and Super Admin accounts are provisioned by the system administrator, not through self-registration.
+          Division Office self-registration is enabled temporarily for testing. Super Admin accounts are still
+          provisioned by the system administrator only.
         </p>
       </div>
 

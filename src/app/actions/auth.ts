@@ -44,11 +44,13 @@ export async function logout() {
   redirect("/login");
 }
 
-// Public self-registration is intentionally limited to "teacher" and
-// "school_admin" roles. Division / Super Admin accounts carry more
-// authority (processing transactions Division-wide, editing the SOP
-// catalog) and should be provisioned directly by whoever administers
-// the Supabase project — never through an open signup form.
+// Public self-registration is normally limited to "teacher" and
+// "school_admin" roles. "division" is allowed here temporarily for
+// testing — remove it from this check (and from the dropdown in
+// RegisterForm.tsx) once real Division accounts are provisioned
+// manually and self-registration for that role is no longer needed.
+// Super Admin remains provisioned directly in Supabase only, never
+// through this form.
 export async function register(formData: FormData): Promise<{ error: string } | void> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
@@ -63,7 +65,7 @@ export async function register(formData: FormData): Promise<{ error: string } | 
   if (password.length < 8) {
     return { error: "Password must be at least 8 characters." };
   }
-  if (role !== "teacher" && role !== "school_admin") {
+  if (role !== "teacher" && role !== "school_admin" && role !== "division") {
     return { error: "Invalid role for self-registration." };
   }
 
