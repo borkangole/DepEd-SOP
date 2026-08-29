@@ -42,6 +42,22 @@ export default function TransactionSummaryCard({
         </span>
       </div>
 
+      {transaction.scheduled_date && (
+        <div className="mt-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <p className="text-sm font-medium text-emerald-900">
+            📅 Scheduled: {new Date(transaction.scheduled_date + "T00:00:00").toLocaleDateString(undefined, {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </p>
+          {transaction.schedule_note && (
+            <p className="mt-1 text-xs text-emerald-800">{transaction.schedule_note}</p>
+          )}
+        </div>
+      )}
+
       {detailEntries.length > 0 && (
         <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-slate-100 pt-4 sm:grid-cols-3">
           {detailEntries.map(([key, value]) => (

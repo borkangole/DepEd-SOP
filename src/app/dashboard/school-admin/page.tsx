@@ -23,7 +23,7 @@ export default async function SchoolAdminDashboard() {
   const { data: transactions } = await supabase
     .from("transactions")
     .select(
-      "id, transaction_type, leave_kind, transfer_scope, current_status, submitted_at, teacher_id, profiles!transactions_teacher_id_fkey(full_name)"
+      "id, transaction_type, leave_kind, transfer_scope, current_status, submitted_at, scheduled_date, teacher_id, profiles!transactions_teacher_id_fkey(full_name)"
     )
     .order("submitted_at", { ascending: false });
 

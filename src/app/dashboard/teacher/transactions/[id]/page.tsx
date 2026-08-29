@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import DashboardHeader from "@/components/DashboardHeader";
 import TransactionSummaryCard from "@/components/TransactionSummaryCard";
+import CorrectionBanner from "@/components/CorrectionBanner";
 import DocumentList from "@/components/DocumentList";
 import DocumentUploadForm from "@/components/DocumentUploadForm";
 import StatusHistoryTimeline from "@/components/StatusHistoryTimeline";
@@ -49,6 +50,12 @@ export default async function TeacherTransactionDetail({ params }: { params: Pro
         </Link>
 
         <TransactionSummaryCard transaction={transaction} />
+
+        {transaction.current_status === "for_correction" && (
+          <CorrectionBanner
+            note={[...history].reverse().find((h) => h.status === "for_correction")?.note ?? null}
+          />
+        )}
 
         <div className="rounded-lg border border-slate-200 bg-white p-6">
           <h3 className="text-sm font-medium text-slate-900">Attached documents</h3>

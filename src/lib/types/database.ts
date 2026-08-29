@@ -75,6 +75,8 @@ export interface Database {
           school_id: string;
           details: Record<string, unknown>;
           current_status: TransactionStatus;
+          scheduled_date: string | null;
+          schedule_note: string | null;
           submitted_at: string;
           updated_at: string;
         };

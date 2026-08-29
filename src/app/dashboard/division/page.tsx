@@ -26,7 +26,7 @@ export default async function DivisionDashboard({
   const { data: transactions } = await supabase
     .from("transactions")
     .select(
-      "id, transaction_type, leave_kind, transfer_scope, current_status, submitted_at, profiles!transactions_teacher_id_fkey(full_name), schools(name)"
+      "id, transaction_type, leave_kind, transfer_scope, current_status, submitted_at, scheduled_date, profiles!transactions_teacher_id_fkey(full_name), schools(name)"
     )
     .order("submitted_at", { ascending: false });
 

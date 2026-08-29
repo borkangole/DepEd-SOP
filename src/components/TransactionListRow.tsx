@@ -8,6 +8,7 @@ type RowTransaction = {
   transfer_scope: TransferScope | null;
   current_status: TransactionStatus;
   submitted_at: string;
+  scheduled_date?: string | null;
 };
 
 export default function TransactionListRow({
@@ -29,6 +30,15 @@ export default function TransactionListRow({
             {meta ? `${meta} · ` : ""}
             Submitted {new Date(transaction.submitted_at).toLocaleDateString()}
           </p>
+          {transaction.scheduled_date && (
+            <p className="mt-0.5 truncate text-xs font-medium text-emerald-700">
+              📅 {new Date(transaction.scheduled_date + "T00:00:00").toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </p>
+          )}
         </div>
         <span
           className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${STATUS_COLOR[transaction.current_status]}`}

@@ -5,6 +5,7 @@ import DashboardHeader from "@/components/DashboardHeader";
 import TransactionSummaryCard from "@/components/TransactionSummaryCard";
 import DocumentList from "@/components/DocumentList";
 import StatusUpdateForm from "@/components/StatusUpdateForm";
+import ScheduleForm from "@/components/ScheduleForm";
 import StatusHistoryTimeline from "@/components/StatusHistoryTimeline";
 import { fetchTransactionById } from "@/lib/transactionDetail";
 import { fetchDocumentsByTransaction } from "@/lib/documents";
@@ -60,6 +61,16 @@ export default async function DivisionTransactionDetail({ params }: { params: Pr
             transactionId={transaction.id}
             options={DIVISION_NEXT[transaction.current_status as TransactionStatus] ?? []}
             redirectPath={`/dashboard/division/transactions/${transaction.id}`}
+          />
+        </div>
+
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
+          <h3 className="mb-2 text-sm font-medium text-slate-900">Visit / pickup schedule</h3>
+          <ScheduleForm
+            transactionId={transaction.id}
+            redirectPath={`/dashboard/division/transactions/${transaction.id}`}
+            scheduledDate={transaction.scheduled_date}
+            scheduleNote={transaction.schedule_note}
           />
         </div>
 

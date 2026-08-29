@@ -7,6 +7,8 @@ export type TransactionDetail = {
   leave_kind: LeaveKind | null;
   transfer_scope: TransferScope | null;
   current_status: TransactionStatus;
+  scheduled_date: string | null;
+  schedule_note: string | null;
   submitted_at: string;
   details: Record<string, unknown>;
   teacher_id: string;
@@ -37,7 +39,7 @@ export async function fetchTransactionById(
   const { data } = await supabase
     .from("transactions")
     .select(
-      "id, transaction_type, leave_kind, transfer_scope, current_status, submitted_at, details, teacher_id, school_id, profiles!transactions_teacher_id_fkey(full_name), schools(name), sop_catalog(title, purpose, requirements, steps, processing_time_days)"
+      "id, transaction_type, leave_kind, transfer_scope, current_status, scheduled_date, schedule_note, submitted_at, details, teacher_id, school_id, profiles!transactions_teacher_id_fkey(full_name), schools(name), sop_catalog(title, purpose, requirements, steps, processing_time_days)"
     )
     .eq("id", id)
     .maybeSingle();
@@ -54,6 +56,8 @@ export async function fetchTransactionById(
     leave_kind: data.leave_kind,
     transfer_scope: data.transfer_scope,
     current_status: data.current_status,
+    scheduled_date: data.scheduled_date,
+    schedule_note: data.schedule_note,
     submitted_at: data.submitted_at,
     details: (data.details as Record<string, unknown>) ?? {},
     teacher_id: data.teacher_id,

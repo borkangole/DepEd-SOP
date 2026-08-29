@@ -134,3 +134,70 @@ export async function updateTransactionStatus(formData: FormData): Promise<{ err
   revalidatePath(redirectPath);
   redirect(redirectPath);
 }
+
+// ---------------------------------------------------------------------------
+// Division: set (or clear) the "ready/visit" date for a transaction, so a
+// teacher — especially one from a remote/upland school — knows whether a
+// personal visit to the Division Office is actually worth the trip, rather
+// than following up speculatively. Independent of current_status: Division
+// can set this at any point, not just on Approved/Completed or Released.
+//
+// RLS (transactions_update_division_admin) is the real gate on who can write
+// these columns; the role check here just gives a clean error message
+// instead of a silent no-op update, matching the style of submitTransaction.
+// ---------------------------------------------------------------------------
+export async function updateTransactionSchedule(formData: FormData): Promise<{ error: string } | void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not signed in." };
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  if (!profile || (profile.role !== "division" && profile.role !== "super_admin")) {
+    return { error: "Only Division Office or Super Admin can set a schedule." };
+  }
+
+  const transactionId = String(formData.get("transaction_id") ?? "");
+  const scheduledDate = String(formData.get("scheduled_date") ?? "").trim() || null;
+  const scheduleNote = String(formData.get("schedule_note") ?? "").trim() || null;
+  const redirectPath = String(formData.get("redirect_path") ?? "/dashboard");
+
+  if (!transactionId) {
+    return { error: "Missing transaction." };
+  }
+
+  const { data: transaction, error } = await supabase
+    .from("transactions")
+    .update({ scheduled_date: scheduledDate, schedule_note: scheduleNote })
+    .eq("id", transactionId)
+    .select("teacher_id")
+    .single();
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  // Notify the teacher directly — this isn't a status change, so the
+  // notify_on_status_change trigger (which only fires on status_log inserts)
+  // doesn't cover it. Requires the notifications_insert_division_admin RLS
+  // policy (0008) — without it this insert is silently denied.
+  if (transaction && scheduledDate) {
+    const { error: notifyError } = await supabase.from("notifications").insert({
+      user_id: transaction.teacher_id,
+      transaction_id: transactionId,
+      message: `A visit date has been set for your transaction: ${scheduledDate}${
+        scheduleNote ? ` — ${scheduleNote}` : ""
+      }`,
+    });
+    if (notifyError) {
+      // Don't fail the whole action over a notification — the schedule
+      // itself is already saved — but log it so a silent RLS denial (like
+      // the one 0008 fixes) doesn't go unnoticed next time.
+      console.error(`Failed to notify teacher ${transaction.teacher_id} of new schedule:`, notifyError);
+    }
+  }
+
+  revalidatePath(redirectPath);
+  redirect(redirectPath);
+}

@@ -1,4 +1,5 @@
 import LogoutButton from "./LogoutButton";
+import NotificationBell from "./NotificationBell";
 
 type Role = "teacher" | "school_admin" | "division" | "super_admin";
 
@@ -53,6 +54,7 @@ export default function DashboardHeader({
           {userName && (
             <span className="hidden text-sm text-slate-600 sm:inline">{userName}</span>
           )}
+          <NotificationBell />
           <LogoutButton />
         </div>
       </div>

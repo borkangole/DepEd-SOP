@@ -20,7 +20,7 @@ export default async function TeacherDashboard() {
 
   const { data: transactions } = await supabase
     .from("transactions")
-    .select("id, transaction_type, leave_kind, transfer_scope, current_status, submitted_at")
+    .select("id, transaction_type, leave_kind, transfer_scope, current_status, submitted_at, scheduled_date")
     .eq("teacher_id", user!.id)
     .order("submitted_at", { ascending: false });
 
