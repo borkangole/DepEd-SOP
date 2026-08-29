@@ -75,7 +75,7 @@ export function countDivisionStyleStats(transactions: { current_status: Transact
 
 export const TRANSFER_SCOPE_LABEL: Record<TransferScope, string> = {
   teaching_school_to_school: "Teaching Personnel, School to School",
-  non_teaching_or_senior_hs: "Non-Teaching / Senior HS",
+  non_teaching_or_senior_hs: "Non-Teaching Personnel",
   other_division_agency: "Other Division/Agency",
 };
 
