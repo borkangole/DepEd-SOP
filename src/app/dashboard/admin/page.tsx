@@ -3,6 +3,7 @@ import DashboardHeader from "@/components/DashboardHeader";
 import StatCards from "@/components/StatCards";
 import TransactionSearchBar from "@/components/TransactionSearchBar";
 import TransactionListRow from "@/components/TransactionListRow";
+import AddSchoolForm from "@/components/AddSchoolForm";
 import type { TransactionStatus } from "@/lib/types/database";
 import { countDivisionStyleStats, getTransactionLabel } from "@/lib/status";
 
@@ -28,9 +29,10 @@ export default async function AdminDashboard({
     .select("id, title, purpose, requirements, steps, processing_time_days, is_active")
     .order("title");
 
-  const { count: schoolCount } = await supabase
+  const { data: schools } = await supabase
     .from("schools")
-    .select("id", { count: "exact", head: true });
+    .select("id, name, district, is_remote")
+    .order("name");
 
   const { count: userCount } = await supabase
     .from("profiles")
@@ -77,13 +79,45 @@ export default async function AdminDashboard({
       <main className="mx-auto max-w-4xl px-6 py-8">
         <div className="mb-6 grid grid-cols-2 gap-4">
           <div className="rounded-lg border border-slate-200 bg-white p-4">
-            <p className="text-2xl font-semibold text-slate-900">{schoolCount ?? 0}</p>
+            <p className="text-2xl font-semibold text-slate-900">{schools?.length ?? 0}</p>
             <p className="text-sm text-slate-500">Schools registered</p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-white p-4">
             <p className="text-2xl font-semibold text-slate-900">{userCount ?? 0}</p>
             <p className="text-sm text-slate-500">User accounts</p>
           </div>
+        </div>
+
+        <div className="mb-8 rounded-lg border border-slate-200 bg-white p-6">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-medium text-slate-900">Schools</h2>
+              <p className="text-xs text-slate-500">
+                A school added here shows up immediately in the registration page&rsquo;s school dropdown.
+              </p>
+            </div>
+            <AddSchoolForm />
+          </div>
+
+          {!schools || schools.length === 0 ? (
+            <p className="text-sm text-slate-500">No schools yet.</p>
+          ) : (
+            <ul className="divide-y divide-slate-100">
+              {schools.map((s) => (
+                <li key={s.id} className="flex items-center justify-between py-2 text-sm">
+                  <div>
+                    <span className="font-medium text-slate-900">{s.name}</span>
+                    {s.district && <span className="text-slate-500"> · {s.district}</span>}
+                  </div>
+                  {s.is_remote && (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                      Upland / remote
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <h2 className="mb-3 text-base font-medium text-slate-900">All Transactions</h2>
