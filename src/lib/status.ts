@@ -36,6 +36,33 @@ export const DIVISION_NEXT: Partial<Record<TransactionStatus, TransactionStatus[
   approved_completed: ["released"],
 };
 
+// Every status a transaction can be in, in the order the SOP workflow
+// normally moves through them. Used to build Super Admin's full override.
+const ALL_STATUSES: TransactionStatus[] = [
+  "submitted",
+  "under_verification",
+  "for_correction",
+  "endorsed",
+  "under_processing",
+  "approved_completed",
+  "released",
+];
+
+/**
+ * Full override: every other status is a valid target, regardless of the
+ * current one — bypassing SCHOOL_ADMIN_NEXT / DIVISION_NEXT's staged
+ * hand-off. Used by both Division and Super Admin, so either office can
+ * step in on a transaction stuck earlier in the chain (e.g. still
+ * "Submitted" or "Under Verification" because a School Admin account is
+ * unavailable) instead of being blocked until School Admin acts.
+ * RLS already allows this at the database level (status_log_insert_staff
+ * has no transition restriction for division/super_admin) — this just
+ * exposes it in the UI.
+ */
+export function fullStatusOverride(current: TransactionStatus): TransactionStatus[] {
+  return ALL_STATUSES.filter((s) => s !== current);
+}
+
 // ---------------------------------------------------------------------------
 // Dashboard stat cards
 // ---------------------------------------------------------------------------

@@ -10,13 +10,15 @@ import StatusHistoryTimeline from "@/components/StatusHistoryTimeline";
 import { fetchTransactionById } from "@/lib/transactionDetail";
 import { fetchDocumentsByTransaction } from "@/lib/documents";
 import { fetchStatusHistory } from "@/lib/statusHistory";
-import { DIVISION_NEXT } from "@/lib/status";
-import type { TransactionStatus } from "@/lib/types/database";
+import { fullStatusOverride } from "@/lib/status";
 
-// Super Admin can see and update every transaction, same as Division
-// (transactions_update_division_admin covers both roles) — this reuses
-// Division's next-status options so Super Admin can step in as backup
-// oversight, not just view read-only.
+// Super Admin gets a full status override — every other status is a valid
+// target, regardless of the current one — rather than Division's staged
+// next-status list. This matches "System-wide oversight": Super Admin can
+// step in on a transaction stuck waiting on School Admin (still Submitted
+// or Under Verification), not just ones already Endorsed to Division.
+// RLS (status_log_insert_staff) already permits this for the super_admin
+// role with no transition restriction; fullStatusOverride just exposes it here.
 export default async function AdminTransactionDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
@@ -60,10 +62,14 @@ export default async function AdminTransactionDetail({ params }: { params: Promi
         </div>
 
         <div className="rounded-lg border border-slate-200 bg-white p-6">
-          <h3 className="mb-2 text-sm font-medium text-slate-900">Update status</h3>
+          <h3 className="text-sm font-medium text-slate-900">Update status</h3>
+          <p className="mt-0.5 mb-2 text-xs text-slate-500">
+            As Super Admin, you can set this to any status directly — including skipping ahead of School
+            Admin or Division if needed.
+          </p>
           <StatusUpdateForm
             transactionId={transaction.id}
-            options={DIVISION_NEXT[transaction.current_status as TransactionStatus] ?? []}
+            options={fullStatusOverride(transaction.current_status)}
             redirectPath={`/dashboard/admin/transactions/${transaction.id}`}
           />
         </div>

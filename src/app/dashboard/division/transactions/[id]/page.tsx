@@ -10,8 +10,15 @@ import StatusHistoryTimeline from "@/components/StatusHistoryTimeline";
 import { fetchTransactionById } from "@/lib/transactionDetail";
 import { fetchDocumentsByTransaction } from "@/lib/documents";
 import { fetchStatusHistory } from "@/lib/statusHistory";
-import { DIVISION_NEXT } from "@/lib/status";
-import type { TransactionStatus } from "@/lib/types/database";
+import { fullStatusOverride } from "@/lib/status";
+
+// Division gets a full status override — every other status is a valid
+// target, regardless of the current one — rather than being blocked until
+// School Admin has verified and endorsed a transaction. Lets Division step
+// in directly on one stuck earlier in the chain (e.g. a School Admin
+// account is unavailable), without waiting.
+// RLS (status_log_insert_staff) already permits this for the division role
+// with no transition restriction; fullStatusOverride just exposes it here.
 
 export default async function DivisionTransactionDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -56,10 +63,13 @@ export default async function DivisionTransactionDetail({ params }: { params: Pr
         </div>
 
         <div className="rounded-lg border border-slate-200 bg-white p-6">
-          <h3 className="mb-2 text-sm font-medium text-slate-900">Update status</h3>
+          <h3 className="text-sm font-medium text-slate-900">Update status</h3>
+          <p className="mt-0.5 mb-2 text-xs text-slate-500">
+            You can set this to any status directly — including skipping ahead of School Admin if needed.
+          </p>
           <StatusUpdateForm
             transactionId={transaction.id}
-            options={DIVISION_NEXT[transaction.current_status as TransactionStatus] ?? []}
+            options={fullStatusOverride(transaction.current_status)}
             redirectPath={`/dashboard/division/transactions/${transaction.id}`}
           />
         </div>
