@@ -46,7 +46,7 @@ export default async function SchoolAdminDashboard() {
             { label: "Total", value: stats.total },
             { label: "Pending", value: stats.pending, accent: "text-amber-600" },
             { label: "Approved", value: stats.approved, accent: "text-green-600" },
-            { label: "Disapproved", value: stats.rejected, accent: "text-red-600" },
+            { label: "For Correction", value: stats.rejected, accent: "text-red-600" },
           ]}
         />
 

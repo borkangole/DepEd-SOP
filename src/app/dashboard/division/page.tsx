@@ -70,7 +70,7 @@ export default async function DivisionDashboard({
             { label: "Pending", value: stats.pending, accent: "text-slate-600" },
             { label: "Processing", value: stats.processing, accent: "text-indigo-600" },
             { label: "Approved", value: stats.approved, accent: "text-green-600" },
-            { label: "Disapproved", value: stats.rejected, accent: "text-red-600" },
+            { label: "For Correction", value: stats.rejected, accent: "text-red-600" },
           ]}
         />
 

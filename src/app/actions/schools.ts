@@ -40,6 +40,7 @@ export async function createSchool(formData: FormData): Promise<{ error: string 
     return { error: error.message };
   }
 
+  revalidatePath("/dashboard/admin/schools");
   revalidatePath("/dashboard/admin");
   revalidatePath("/register");
 }

@@ -22,7 +22,7 @@ export default async function NewTransactionPage() {
     .order("title");
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       <DashboardHeader
         title="New Transaction"
         subtitle="Submit a request for review"
@@ -31,11 +31,17 @@ export default async function NewTransactionPage() {
       />
 
       <main className="mx-auto max-w-2xl px-6 py-8">
-        <Link href="/dashboard/teacher" className="text-sm text-blue-700 hover:underline">
-          ← Back to my transactions
+        <Link
+          href="/dashboard/teacher"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--brand)] hover:underline"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          Back to my transactions
         </Link>
 
-        <div className="mt-4 rounded-lg border border-slate-200 bg-white p-6">
+        <div className="animate-in mt-4 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-6">
           <NewTransactionForm sopEntries={sopEntries ?? []} />
         </div>
       </main>

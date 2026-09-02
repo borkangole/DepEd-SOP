@@ -36,7 +36,7 @@ export default async function TeacherTransactionDetail({ params }: { params: Pro
   ]);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       <DashboardHeader
         title="Transaction Details"
         subtitle="Your submitted request"
@@ -45,8 +45,14 @@ export default async function TeacherTransactionDetail({ params }: { params: Pro
       />
 
       <main className="mx-auto max-w-3xl space-y-6 px-6 py-8">
-        <Link href="/dashboard/teacher" className="text-sm text-blue-700 hover:underline">
-          ← Back to my transactions
+        <Link
+          href="/dashboard/teacher"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--brand)] hover:underline"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          Back to my transactions
         </Link>
 
         <TransactionSummaryCard transaction={transaction} />
@@ -57,14 +63,14 @@ export default async function TeacherTransactionDetail({ params }: { params: Pro
           />
         )}
 
-        <div className="rounded-lg border border-slate-200 bg-white p-6">
-          <h3 className="text-sm font-medium text-slate-900">Attached documents</h3>
+        <div className="animate-in rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-6">
+          <h3 className="font-display text-sm font-semibold text-slate-900">Attached documents</h3>
           <DocumentList documents={documentsByTransaction[transaction.id] ?? []} />
           <DocumentUploadForm transactionId={transaction.id} redirectPath={`/dashboard/teacher/transactions/${transaction.id}`} />
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-white p-6">
-          <h3 className="mb-4 text-sm font-medium text-slate-900">Status history</h3>
+        <div className="animate-in rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] p-6" style={{ "--stagger-index": 1 } as React.CSSProperties}>
+          <h3 className="mb-4 font-display text-sm font-semibold text-slate-900">Status history</h3>
           <StatusHistoryTimeline history={history} />
         </div>
       </main>
