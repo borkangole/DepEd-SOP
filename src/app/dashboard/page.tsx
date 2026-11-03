@@ -19,7 +19,9 @@ export default async function DashboardIndex() {
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("role, status").eq("id", user.id).single();
+
+  if (profile?.status !== "approved") redirect("/pending");
 
   redirect(ROLE_HOME[profile?.role ?? "teacher"] ?? "/dashboard/teacher");
 }

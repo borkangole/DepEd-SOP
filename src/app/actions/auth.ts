@@ -44,13 +44,13 @@ export async function logout() {
   redirect("/login");
 }
 
-// Public self-registration is normally limited to "teacher" and
-// "school_admin" roles. "division" is allowed here temporarily for
-// testing — remove it from this check (and from the dropdown in
-// RegisterForm.tsx) once real Division accounts are provisioned
-// manually and self-registration for that role is no longer needed.
-// Super Admin remains provisioned directly in Supabase only, never
-// through this form.
+// Self-registration is open to "teacher", "school_admin" and "division",
+// but every new account starts as PENDING and can't use the system until
+// an approver accepts it (see 0009_registration_approval.sql): School Admin
+// approves teachers in their school, Division approves School Admins, and
+// Super Admin approves Division accounts. The role sent here is only a
+// request — the database ignores anything outside those three roles, so
+// Super Admin can never be self-registered.
 export async function register(formData: FormData): Promise<{ error: string } | void> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
@@ -59,7 +59,7 @@ export async function register(formData: FormData): Promise<{ error: string } | 
   const role = String(formData.get("role") ?? "teacher");
   const schoolId = String(formData.get("school_id") ?? "");
 
-  if (!email || !password || !fullName || !schoolId) {
+  if (!email || !password || !fullName || !employeeId || !schoolId) {
     return { error: "Please fill in all required fields." };
   }
   if (password.length < 8) {
@@ -76,7 +76,7 @@ export async function register(formData: FormData): Promise<{ error: string } | 
     options: {
       data: {
         full_name: fullName,
-        employee_id: employeeId || null,
+        employee_id: employeeId,
         role,
         school_id: schoolId,
       },

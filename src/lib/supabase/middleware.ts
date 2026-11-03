@@ -53,17 +53,27 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user) {
+  if (user && isProtected) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, status")
+      .eq("id", user.id)
+      .single();
+
+    // Accounts that haven't been approved yet (or were rejected) never get
+    // into any dashboard — they land on /pending instead. RLS blocks their
+    // data access independently (current_user_role() is null for them).
+    if (!profile || profile.status !== "approved") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/pending";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+
     const matchedPrefix = Object.keys(ROLE_PREFIX).find((p) => path.startsWith(p));
     if (matchedPrefix) {
       const requiredRole = ROLE_PREFIX[matchedPrefix];
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .single();
-
-      if (!profile || profile.role !== requiredRole) {
+      if (profile.role !== requiredRole) {
         const url = request.nextUrl.clone();
         url.pathname = "/unauthorized";
         return NextResponse.redirect(url);

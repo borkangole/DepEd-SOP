@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import UsersDirectory from "@/components/UsersDirectory";
-import type { UserRole } from "@/lib/types/database";
+import type { AccountStatus, UserRole } from "@/lib/types/database";
 
 // Read-only directory — RLS (profiles_select_division_admin) already lets
 // Super Admin (and Division) read every profile system-wide; there's no
@@ -10,7 +10,7 @@ export default async function UsersPage() {
 
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, full_name, employee_id, role, schools(name)")
+    .select("id, full_name, employee_id, role, status, schools(name)")
     .order("full_name");
 
   const users = (profiles ?? []).map((p) => {
@@ -20,6 +20,7 @@ export default async function UsersPage() {
       full_name: p.full_name,
       employee_id: p.employee_id,
       role: p.role as UserRole,
+      status: p.status as AccountStatus,
       schoolName: schoolName ?? null,
     };
   });

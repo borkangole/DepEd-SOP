@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatCards from "@/components/StatCards";
+import PendingRegistrations from "@/components/PendingRegistrations";
+import { fetchRegistrations } from "@/lib/registrations";
 import TransactionListRow from "@/components/TransactionListRow";
 import type { TransactionStatus } from "@/lib/types/database";
 import { countTeacherStyleStats } from "@/lib/status";
@@ -16,6 +18,8 @@ export default async function SchoolAdminDashboard() {
     .select("full_name")
     .eq("id", user!.id)
     .single();
+
+  const pendingAccounts = await fetchRegistrations(supabase, "school_admin");
 
   // RLS (transactions_select_school_admin) already scopes this to the
   // caller's own school — no need to filter by school_id client-side,
@@ -41,6 +45,12 @@ export default async function SchoolAdminDashboard() {
       />
 
       <main className="mx-auto max-w-4xl px-6 py-8">
+        <PendingRegistrations
+          accounts={pendingAccounts}
+          title="Pending teacher registrations"
+          description="New teacher accounts from your school. Check the name and employee ID before approving."
+        />
+
         <StatCards
           stats={[
             { label: "Total", value: stats.total },

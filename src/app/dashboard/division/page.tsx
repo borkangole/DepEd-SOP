@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatCards from "@/components/StatCards";
+import PendingRegistrations from "@/components/PendingRegistrations";
+import { fetchRegistrations } from "@/lib/registrations";
 import TransactionSearchBar from "@/components/TransactionSearchBar";
 import TransactionListRow from "@/components/TransactionListRow";
 import type { TransactionStatus } from "@/lib/types/database";
@@ -22,6 +24,8 @@ export default async function DivisionDashboard({
     .select("full_name")
     .eq("id", user!.id)
     .single();
+
+  const pendingAccounts = await fetchRegistrations(supabase, "division");
 
   const { data: transactions } = await supabase
     .from("transactions")
@@ -64,6 +68,12 @@ export default async function DivisionDashboard({
       />
 
       <main className="mx-auto max-w-4xl px-6 py-8">
+        <PendingRegistrations
+          accounts={pendingAccounts}
+          title="Pending registrations"
+          description="New teacher and School Admin accounts waiting for approval across the division."
+        />
+
         <StatCards
           stats={[
             { label: "Total", value: stats.total },

@@ -26,10 +26,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .select("id", { count: "exact", head: true })
     .in("current_status", ["submitted", "under_verification"]);
 
+  // Accounts waiting for approval — badge on the Approvals nav item.
+  const { count: approvalsCount } = await supabase
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "pending");
+
   return (
     <AdminShell
       userName={profile?.full_name}
       pendingCount={pendingCount ?? 0}
+      approvalsCount={approvalsCount ?? 0}
       notificationBell={<NotificationBell />}
       logoutButton={<LogoutButton />}
     >

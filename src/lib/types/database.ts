@@ -3,6 +3,7 @@
 //   npx supabase gen types typescript --project-id <ref> > src/lib/types/database.ts
 
 export type UserRole = "teacher" | "school_admin" | "division" | "super_admin";
+export type AccountStatus = "pending" | "approved" | "rejected";
 export type TransactionType = "authority_to_travel" | "leave_application" | "transfer_of_assignment";
 export type LeaveKind = "maternity" | "leave_credits";
 export type TransferScope = "teaching_school_to_school" | "non_teaching_or_senior_hs" | "other_division_agency";
@@ -36,6 +37,9 @@ export interface Database {
           employee_id: string | null;
           role: UserRole;
           school_id: string | null;
+          status: AccountStatus;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & { id: string; full_name: string };

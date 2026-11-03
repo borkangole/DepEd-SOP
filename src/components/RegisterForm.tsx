@@ -29,13 +29,15 @@ export default function RegisterForm({ schools }: { schools: School[] }) {
 
       <div>
         <label htmlFor="employee_id" className="block text-sm font-medium text-slate-700">
-          Employee ID (optional)
+          Employee ID
         </label>
         <input
           id="employee_id"
           name="employee_id"
+          required
           className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
         />
+        <p className="mt-1 text-xs text-slate-500">Used by your approver to confirm you&rsquo;re DepEd personnel.</p>
       </div>
 
       <div>
@@ -83,8 +85,8 @@ export default function RegisterForm({ schools }: { schools: School[] }) {
           <option value="division">Division Office</option>
         </select>
         <p className="mt-1 text-xs text-slate-500">
-          Division Office self-registration is enabled temporarily for testing. Super Admin accounts are still
-          provisioned by the system administrator only.
+          New accounts must be approved before they can be used: teachers by their School Admin, School Admins by
+          the Division Office, and Division accounts by the system administrator.
         </p>
       </div>
 

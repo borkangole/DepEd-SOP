@@ -20,10 +20,13 @@ export default function NotificationBellClient({
   notifications,
   unreadCount,
   detailBasePath,
+  generalPath,
 }: {
   notifications: NotificationEntry[];
   unreadCount: number;
   detailBasePath: string;
+  /** Destination for notifications not tied to a transaction (e.g. registrations). */
+  generalPath: string;
 }) {
   const [open, setOpen] = useState(false);
   const [, startTransition] = useTransition();
@@ -103,15 +106,12 @@ export default function NotificationBellClient({
                   );
                   return (
                     <li key={n.id}>
-                      {n.transaction_id ? (
-                        <Link href={`${detailBasePath}/${n.transaction_id}`} onClick={() => handleItemClick(n)}>
-                          {content}
-                        </Link>
-                      ) : (
-                        <button className="block w-full text-left" onClick={() => handleItemClick(n)}>
-                          {content}
-                        </button>
-                      )}
+                      <Link
+                        href={n.transaction_id ? `${detailBasePath}/${n.transaction_id}` : generalPath}
+                        onClick={() => handleItemClick(n)}
+                      >
+                        {content}
+                      </Link>
                     </li>
                   );
                 })}

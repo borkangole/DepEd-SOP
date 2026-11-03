@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
-type NavKey = "dashboard" | "transactions" | "sop" | "schools" | "users";
+type NavKey = "dashboard" | "transactions" | "approvals" | "sop" | "schools" | "users";
 
 const NAV: { key: NavKey; href: string; label: string; icon: ReactNode }[] = [
   {
@@ -28,6 +28,18 @@ const NAV: { key: NavKey; href: string; label: string; icon: ReactNode }[] = [
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M9 12h6m-6 4h6m-9 4h12a2 2 0 002-2V6a2 2 0 00-2-2H8.5a2 2 0 00-1.4.6L4.6 7.1A2 2 0 004 8.5V18a2 2 0 002 2z"
+      />
+    ),
+  },
+  {
+    key: "approvals",
+    href: "/dashboard/admin/approvals",
+    label: "Approvals",
+    icon: (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 019.374 21c-2.331 0-4.512-.645-6.374-1.766z"
       />
     ),
   },
@@ -78,12 +90,14 @@ const NAV: { key: NavKey; href: string; label: string; icon: ReactNode }[] = [
 export default function AdminShell({
   userName,
   pendingCount,
+  approvalsCount,
   notificationBell,
   logoutButton,
   children,
 }: {
   userName?: string | null;
   pendingCount: number;
+  approvalsCount: number;
   notificationBell: ReactNode;
   logoutButton: ReactNode;
   children: ReactNode;
@@ -119,7 +133,9 @@ export default function AdminShell({
         <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
           {NAV.map((item) => {
             const active = item.href === "/dashboard/admin" ? pathname === item.href : pathname.startsWith(item.href);
-            const showBadge = item.key === "transactions" && pendingCount > 0;
+            const badge =
+              item.key === "transactions" ? pendingCount : item.key === "approvals" ? approvalsCount : 0;
+            const showBadge = badge > 0;
             return (
               <Link
                 key={item.key}
@@ -149,7 +165,7 @@ export default function AdminShell({
                       active ? "bg-white/25 text-white" : "bg-rose-100 text-rose-700"
                     }`}
                   >
-                    {pendingCount}
+                    {badge}
                   </span>
                 )}
               </Link>

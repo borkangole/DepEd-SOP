@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { UserRole } from "@/lib/types/database";
+import type { AccountStatus, UserRole } from "@/lib/types/database";
 
 type UserRow = {
   id: string;
   full_name: string;
   employee_id: string | null;
   role: UserRole;
+  status: AccountStatus;
   schoolName: string | null;
 };
 
@@ -137,6 +138,15 @@ export default function UsersDirectory({ users }: { users: UserRow[] }) {
                     {u.employee_id && ` · ID ${u.employee_id}`}
                   </p>
                 </div>
+                {u.status !== "approved" && (
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
+                      u.status === "pending" ? "bg-amber-100 text-amber-800" : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {u.status === "pending" ? "Pending approval" : "Rejected"}
+                  </span>
+                )}
                 <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${ROLE_BADGE[u.role]}`}>
                   {ROLE_LABEL[u.role]}
                 </span>
