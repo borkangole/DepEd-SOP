@@ -62,7 +62,12 @@ export async function register(formData: FormData): Promise<{ error: string } | 
   if (!email || !password || !fullName || !employeeId || !schoolId) {
     return { error: "Please fill in all required fields." };
   }
-  if (password.length < 8) {
+  // Same rule is enforced in the database (0010_require_deped_email.sql);
+  // this just gives a friendly message before Supabase is even called.
+  if (!email.toLowerCase().endsWith("@deped.gov.ph")) {
+    return { error: "Please register with your official DepEd email (ending in @deped.gov.ph)." };
+  }
+    if (password.length < 8) {
     return { error: "Password must be at least 8 characters." };
   }
   if (role !== "teacher" && role !== "school_admin" && role !== "division") {
