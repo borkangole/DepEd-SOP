@@ -1,3 +1,4 @@
+import Image from "next/image";
 import LogoutButton from "./LogoutButton";
 import NotificationBell from "./NotificationBell";
 
@@ -47,7 +48,15 @@ export default function DashboardHeader({
       style={{ boxShadow: meta ? `inset 0 -3px 0 0 ${meta.accent}` : undefined }}
     >
       <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <Image
+            src="/deped-logo.webp"
+            alt="Department of Education"
+            width={1280}
+            height={654}
+            className="h-8 w-auto shrink-0"
+          />
+          <span className="hidden h-8 w-px shrink-0 bg-[var(--border-soft)] sm:block" />
           {meta && (
             <span
               className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase ${meta.badge}`}
@@ -56,9 +65,9 @@ export default function DashboardHeader({
               {meta.label}
             </span>
           )}
-          <div>
-            <h1 className="font-display text-lg leading-tight font-semibold text-slate-900">{title}</h1>
-            {subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
+          <div className="hidden min-w-0 sm:block">
+            <h1 className="truncate font-display text-lg leading-tight font-semibold text-slate-900">{title}</h1>
+            {subtitle && <p className="truncate text-sm text-slate-500">{subtitle}</p>}
           </div>
         </div>
         <div className="flex items-center gap-3">

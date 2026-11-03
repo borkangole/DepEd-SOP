@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
@@ -121,9 +122,13 @@ export default function AdminShell({
         }`}
       >
         <div className="flex h-16 items-center gap-2.5 border-b border-[var(--border-soft)] px-5">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--brand)] font-display text-sm font-bold text-white">
-            DS
-          </span>
+          <Image
+            src="/deped-logo.webp"
+            alt="Department of Education"
+            width={1280}
+            height={654}
+            className="h-8 w-auto shrink-0"
+          />
           <div className="min-w-0">
             <p className="truncate font-display text-sm leading-tight font-semibold text-slate-900">Digital SOP</p>
             <p className="truncate text-[11px] text-slate-500">Division of Capiz</p>

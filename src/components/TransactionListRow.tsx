@@ -59,6 +59,13 @@ export default function TransactionListRow({
           {meta ? `${meta} · ` : ""}
           Submitted {new Date(transaction.submitted_at).toLocaleDateString()}
         </p>
+        {/* On phones the status sits under the title so the title has room. */}
+        <span
+          className={`mt-1.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium sm:hidden ${STATUS_COLOR[transaction.current_status]}`}
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-current opacity-60" />
+          {STATUS_LABEL[transaction.current_status]}
+        </span>
         {transaction.scheduled_date && (
           <p className="mt-0.5 truncate text-xs font-medium text-emerald-700">
             📅{" "}
@@ -72,7 +79,7 @@ export default function TransactionListRow({
       </div>
 
       <span
-        className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${STATUS_COLOR[transaction.current_status]}`}
+        className={`hidden shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium sm:inline-flex ${STATUS_COLOR[transaction.current_status]}`}
       >
         <span className="h-1.5 w-1.5 rounded-full bg-current opacity-60" />
         {STATUS_LABEL[transaction.current_status]}
