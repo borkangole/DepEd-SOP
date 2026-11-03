@@ -32,7 +32,7 @@ export default function AuthHero({
         </p>
 
         <div className="mt-6">
-          <LoginScene />
+          <LoginScene idPrefix="desktop" />
         </div>
       </div>
     </section>

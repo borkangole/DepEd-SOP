@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import AuthHero from "@/components/AuthHero";
+import AuthMobileHero from "@/components/AuthMobileHero";
 import RegisterForm from "@/components/RegisterForm";
 
 export default async function RegisterPage() {
@@ -15,9 +16,11 @@ export default async function RegisterPage() {
         description="Register with your DepEd email. Once your School Admin or the Division Office approves you, you can file and track requests online."
       />
 
-      <section className="flex min-h-screen flex-col items-center justify-center px-5 py-10 sm:px-10">
-        <div className="w-full max-w-md">
-          <div className="animate-in flex flex-col items-center text-center">
+      <section className="flex min-h-screen flex-col lg:items-center lg:justify-center lg:px-10 lg:py-10">
+        <AuthMobileHero title="Create an account" subtitle="Digital SOP System · Division of Capiz" />
+
+        <div className="relative z-[1] mx-auto -mt-8 w-full max-w-md px-5 pb-10 sm:px-0 lg:mt-0 lg:pb-0">
+          <div className="animate-in hidden flex-col items-center text-center lg:flex">
             <Image
               src="/deped-logo.webp"
               alt="Department of Education"
@@ -31,7 +34,7 @@ export default async function RegisterPage() {
           </div>
 
           <div
-            className="animate-in mt-7 rounded-2xl border border-[var(--border-soft)] bg-[var(--surface)] p-6 shadow-[0_18px_40px_-24px_rgba(28,35,51,0.35)]"
+            className="animate-in rounded-2xl lg:mt-7 border border-[var(--border-soft)] bg-[var(--surface)] p-6 shadow-[0_18px_40px_-24px_rgba(28,35,51,0.35)]"
             style={{ "--stagger-index": 1 } as React.CSSProperties}
           >
             <RegisterForm schools={schools ?? []} />

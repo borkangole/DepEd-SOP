@@ -98,7 +98,6 @@ h1, h2, h3,
 
 .scene-ribbon {
   fill: none;
-  stroke: url(#ribbon-grad);
   stroke-width: 7.5;
   stroke-linecap: round;
   stroke-dasharray: 100;

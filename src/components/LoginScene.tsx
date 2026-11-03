@@ -9,16 +9,19 @@
 // 16:10 aspect ratio, so the HTML cards can be placed with plain percentages.
 const RIBBON = "M 14 74 C 30 54, 44 44, 62 50 S 96 60, 114 52 S 132 44, 140 42";
 
-export default function LoginScene() {
+export default function LoginScene({ idPrefix = "scene" }: { idPrefix?: string }) {
+  // SVG ids must be unique per page — the login page renders this twice
+  // (desktop panel + mobile banner), so every id gets a prefix.
+  const id = (name: string) => `${idPrefix}-${name}`;
   return (
     <div className="scene" aria-hidden>
       <svg className="scene-svg" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid meet">
         <defs>
-          <linearGradient id="ribbon-grad" x1="0" x2="1" y1="0" y2="0">
+          <linearGradient id={id("ribbon-grad")} x1="0" x2="1" y1="0" y2="0">
             <stop offset="0%" stopColor="#5b8fe6" />
             <stop offset="100%" stopColor="#1f5fcf" />
           </linearGradient>
-          <filter id="token-glow" x="-200%" y="-200%" width="500%" height="500%">
+          <filter id={id("token-glow")} x="-200%" y="-200%" width="500%" height="500%">
             <feGaussianBlur stdDeviation="1.4" result="b" />
             <feMerge>
               <feMergeNode in="b" />
@@ -28,21 +31,21 @@ export default function LoginScene() {
         </defs>
 
         {/* Ribbon: draws itself in once, then the arrowhead lands. */}
-        <path id="ribbon-path" d={RIBBON} className="scene-ribbon" pathLength={100} />
+        <path id={id("ribbon-path")} d={RIBBON} className="scene-ribbon" pathLength={100} stroke={`url(#${id("ribbon-grad")})`} />
         <polygon points="138,33.5 153,41.6 139.5,51" className="scene-arrowhead" fill="#1f5fcf" />
 
         {/* A request token travelling the ribbon, on a loop. */}
         <g className="scene-motion">
-          <circle r="2.1" fill="#ffffff" filter="url(#token-glow)">
+          <circle r="2.1" fill="#ffffff" filter={`url(#${id("token-glow")})`}>
             <animateMotion dur="6s" begin="1.6s" repeatCount="indefinite" rotate="auto">
-              <mpath href="#ribbon-path" />
+              <mpath href={`#${id("ribbon-path")}`} />
             </animateMotion>
           </circle>
         </g>
 
         {/* Dotted flight path + plane (Authority to Travel). */}
         <path
-          id="flight-path"
+          id={id("flight-path")}
           d="M 22 92 C 34 84, 44 90, 54 84 S 70 76, 78 82"
           className="scene-flight"
         />
@@ -54,7 +57,7 @@ export default function LoginScene() {
               transform="scale(1.6)"
             />
             <animateMotion dur="7s" begin="0.8s" repeatCount="indefinite" rotate="auto" keyPoints="0;1" keyTimes="0;1">
-              <mpath href="#flight-path" />
+              <mpath href={`#${id("flight-path")}`} />
             </animateMotion>
           </g>
         </g>
