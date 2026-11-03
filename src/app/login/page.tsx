@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import LoginForm from "@/components/LoginForm";
-import LoginScene from "@/components/LoginScene";
+import AuthHero from "@/components/AuthHero";
 
 export default async function LoginPage({
   searchParams,
@@ -12,35 +12,14 @@ export default async function LoginPage({
   const redirectTo = params.redirectTo ?? "/dashboard";
 
   return (
-    <main className="grid min-h-screen lg:grid-cols-[1.15fr_1fr]">
-      {/* Left: the living illustration (desktop only) */}
-      <section className="login-hero relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-center lg:px-14 xl:px-20">
-        <div className="relative z-[1] mx-auto w-full max-w-2xl">
-          <p className="animate-in text-xs font-semibold tracking-[0.18em] text-[var(--deped-blue)] uppercase">
-            Schools Division of Capiz
-          </p>
-          <h2
-            className="animate-in mt-3 max-w-lg font-display text-4xl leading-[1.1] font-semibold text-slate-900 xl:text-5xl"
-            style={{ "--stagger-index": 1 } as React.CSSProperties}
-          >
-            Every request, tracked from filing to release.
-          </h2>
-          <p
-            className="animate-in mt-4 max-w-md text-base text-slate-600"
-            style={{ "--stagger-index": 2 } as React.CSSProperties}
-          >
-            Travel authority, leave, and transfer requests &mdash; submitted online, verified by your school, and
-            processed by the Division, with no trip needed just to check on them.
-          </p>
-
-          <div className="mt-6">
-            <LoginScene />
-          </div>
-        </div>
-      </section>
+    <main className="grid min-h-screen lg:grid-cols-[1.15fr_1fr] lg:items-start">
+      <AuthHero
+        title="Every request, tracked from filing to release."
+        description="Travel authority, leave, and transfer requests — submitted online, verified by your school, and processed by the Division, with no trip needed just to check on them."
+      />
 
       {/* Right: sign in */}
-      <section className="flex flex-col items-center justify-center px-5 py-10 sm:px-10">
+      <section className="flex min-h-screen flex-col items-center justify-center px-5 py-10 sm:px-10">
         <div className="w-full max-w-sm">
           <div className="animate-in flex flex-col items-center text-center">
             <Image
