@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/lib/session";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatCards from "@/components/StatCards";
 import PendingRegistrations from "@/components/PendingRegistrations";
@@ -14,16 +14,7 @@ export default async function DivisionDashboard({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user!.id)
-    .single();
+  const { supabase, profile } = await getSession();
 
   const pendingAccounts = await fetchRegistrations(supabase, "division");
 

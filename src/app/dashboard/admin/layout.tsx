@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/lib/session";
 import AdminShell from "@/components/AdminShell";
 import NotificationBell from "@/components/NotificationBell";
 import LogoutButton from "@/components/LogoutButton";
@@ -8,29 +8,17 @@ import LogoutButton from "@/components/LogoutButton";
 // this fetches the two things the shell itself needs (display name, and
 // a "needs attention" count for the Transactions nav badge) once, up top.
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, profile } = await getSession();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user!.id)
-    .single();
-
-  // Transactions still sitting at the earliest stages — the ones most
-  // likely to need a Super Admin nudge or override.
-  const { count: pendingCount } = await supabase
-    .from("transactions")
-    .select("id", { count: "exact", head: true })
-    .in("current_status", ["submitted", "under_verification"]);
-
-  // Accounts waiting for approval — badge on the Approvals nav item.
-  const { count: approvalsCount } = await supabase
-    .from("profiles")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "pending");
+  // Both badge counts in parallel: transactions still at the earliest
+  // stages (Transactions nav) and accounts waiting for approval (Approvals).
+  const [{ count: pendingCount }, { count: approvalsCount }] = await Promise.all([
+    supabase
+      .from("transactions")
+      .select("id", { count: "exact", head: true })
+      .in("current_status", ["submitted", "under_verification"]),
+    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending"),
+  ]);
 
   return (
     <AdminShell

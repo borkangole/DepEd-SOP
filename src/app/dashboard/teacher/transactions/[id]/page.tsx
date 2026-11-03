@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/lib/session";
 import DashboardHeader from "@/components/DashboardHeader";
 import TransactionSummaryCard from "@/components/TransactionSummaryCard";
 import CorrectionBanner from "@/components/CorrectionBanner";
@@ -13,16 +13,7 @@ import { fetchStatusHistory } from "@/lib/statusHistory";
 
 export default async function TeacherTransactionDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user!.id)
-    .single();
+  const { supabase, profile } = await getSession();
 
   const transaction = await fetchTransactionById(supabase, id);
   // RLS (transactions_select_own_teacher) already limits this to the

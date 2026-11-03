@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/lib/session";
 import { fetchNotifications } from "@/lib/notifications";
 import NotificationBellClient from "@/components/NotificationBellClient";
 import type { UserRole } from "@/lib/types/database";
@@ -29,16 +29,11 @@ const GENERAL_PATH: Record<UserRole, string> = {
  * nothing rather than throwing.
  */
 export default async function NotificationBell() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Shares the page's cached session — no extra auth/profile round trips.
+  const { supabase, user, profile } = await getSession();
   if (!user) return null;
 
-  const [{ data: profile }, { notifications, unreadCount }] = await Promise.all([
-    supabase.from("profiles").select("role").eq("id", user.id).single(),
-    fetchNotifications(supabase, user.id),
-  ]);
+  const { notifications, unreadCount } = await fetchNotifications(supabase, user.id);
 
   const role = (profile?.role as UserRole | undefined) ?? "teacher";
 

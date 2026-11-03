@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/lib/session";
 import StatCards from "@/components/StatCards";
 import TransactionListRow from "@/components/TransactionListRow";
 import AdminGlobalSearch, { type SearchItem } from "@/components/AdminGlobalSearch";
@@ -72,16 +72,7 @@ const QUICK_LINKS = [
 ];
 
 export default async function AdminDashboard() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user!.id)
-    .single();
+  const { supabase, profile } = await getSession();
 
   const [{ data: transactions }, { data: schools }, { data: users }] = await Promise.all([
     supabase

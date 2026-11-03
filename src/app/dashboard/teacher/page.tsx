@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/lib/session";
 import DashboardHeader from "@/components/DashboardHeader";
 import StatCards from "@/components/StatCards";
 import TeacherTransactionList from "@/components/TeacherTransactionList";
@@ -15,16 +15,7 @@ function greeting(): string {
 }
 
 export default async function TeacherDashboard() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user!.id)
-    .single();
+  const { supabase, user, profile } = await getSession();
 
   const { data: transactions } = await supabase
     .from("transactions")

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/lib/session";
 import DashboardHeader from "@/components/DashboardHeader";
 import TransactionSummaryCard from "@/components/TransactionSummaryCard";
 import DocumentList from "@/components/DocumentList";
@@ -22,16 +22,7 @@ import { fullStatusOverride } from "@/lib/status";
 
 export default async function DivisionTransactionDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user!.id)
-    .single();
+  const { supabase, profile } = await getSession();
 
   const transaction = await fetchTransactionById(supabase, id);
   if (!transaction) notFound();

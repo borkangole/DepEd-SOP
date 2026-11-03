@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/lib/session";
 import DashboardHeader from "@/components/DashboardHeader";
 import TransactionSummaryCard from "@/components/TransactionSummaryCard";
 import DocumentList from "@/components/DocumentList";
@@ -14,16 +14,7 @@ import type { TransactionStatus } from "@/lib/types/database";
 
 export default async function SchoolAdminTransactionDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user!.id)
-    .single();
+  const { supabase, profile } = await getSession();
 
   const transaction = await fetchTransactionById(supabase, id);
   // RLS (transactions_select_school_admin) already scopes this to the

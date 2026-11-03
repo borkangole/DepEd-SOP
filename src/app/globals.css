@@ -288,3 +288,17 @@ h1, h2, h3,
     linear-gradient(180deg, #f3f6fb 0%, #eef2f8 100%);
   border-right: 1px solid var(--border-soft);
 }
+
+/* Loading skeleton shimmer (DashboardSkeleton). */
+.skeleton {
+  background: linear-gradient(90deg, #ece7dc 0%, #f6f2ea 50%, #ece7dc 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+}
